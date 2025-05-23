@@ -28,7 +28,7 @@ function App() {
 
     useEffect(() => {
         room.initialize();
-        createInitialButtons();
+        checkAndCreateInitialButton();
     }, []);
 
     useEffect(() => {
@@ -41,20 +41,31 @@ function App() {
         }
     }, [clicks.length]);
 
-    const createInitialButtons = async () => {
+    useEffect(() => {
+        // If buttons become empty, create one
         if (buttons.length === 0) {
-            const initialButtons = [
-                'red button',
-                'blue circle',
-                'green square',
-                'yellow triangle',
-                'purple star'
-            ];
-
-            for (const buttonText of initialButtons) {
-                await generateButton(buttonText);
-            }
+            checkAndCreateInitialButton();
         }
+    }, [buttons.length]);
+
+    const checkAndCreateInitialButton = async () => {
+        // Wait a bit to ensure room is initialized
+        setTimeout(async () => {
+            const currentButtons = room.collection('button').getList();
+            if (currentButtons.length === 0) {
+                setIsGenerating(true);
+                const initialPrompts = [
+                    'red button',
+                    'blue circle', 
+                    'green square',
+                    'yellow triangle',
+                    'purple star'
+                ];
+                const randomPrompt = initialPrompts[Math.floor(Math.random() * initialPrompts.length)];
+                await generateButton(randomPrompt);
+                setIsGenerating(false);
+            }
+        }, 1000);
     };
 
     const generateButton = async (buttonText) => {
@@ -260,4 +271,3 @@ function App() {
 }
 
 ReactDOM.render(<App />, document.getElementById('root'));
-
